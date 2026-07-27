@@ -10,7 +10,17 @@ import tkinter as tk
 from tkinter import messagebox
 import sqlite3
 import os
+import sys
+import threading
+import urllib.request
 from datetime import datetime
+
+# Versão atual do app — atualize esse número a cada novo commit
+VERSION = "1.0.0"
+
+# URLs do repositório público no GitHub
+URL_VERSION = "https://raw.githubusercontent.com/Pabloluan981/controle-horas/master/version.txt"
+URL_SCRIPT  = "https://raw.githubusercontent.com/Pabloluan981/controle-horas/master/controle_horas.py"
 
 CAMINHO_DB = os.path.join(os.path.dirname(os.path.abspath(__file__)), "horas.db")
 
@@ -326,7 +336,9 @@ class AppControleHoras:
         self._aplicar_tema()
         self._verificar_tarefa_em_andamento()
         self._tick()
-        self.root.after(100, self._aplicar_tema)  # redesenha botões após layout pronto
+        self.root.after(100, self._aplicar_tema)
+        # Verifica atualização em background (não trava a abertura do app)
+        threading.Thread(target=self._verificar_atualizacao, daemon=True).start()  # redesenha botões após layout pronto
 
     # ----------------------------------------------------------
     # MONTAGEM DA INTERFACE
@@ -875,6 +887,53 @@ trocar('dia');
         tmp.write(html.encode("utf-8"))
         tmp.close()
         webbrowser.open(f"file:///{tmp.name}")
+
+    # ----------------------------------------------------------
+    # ATUALIZAÇÃO AUTOMÁTICA
+    # ----------------------------------------------------------
+
+    def _verificar_atualizacao(self):
+        """
+        Roda em background (thread separada) pra não travar o app.
+        Busca o version.txt do GitHub e compara com a versão local.
+        Se for diferente, avisa o usuário na thread principal via 'after'.
+        """
+        try:
+            with urllib.request.urlopen(URL_VERSION, timeout=5) as resp:
+                versao_remota = resp.read().decode().strip()
+
+            if versao_remota != VERSION:
+                # Usa after() para chamar o popup na thread principal do tkinter
+                # (tkinter não é thread-safe — nunca atualize widgets de outras threads)
+                self.root.after(0, lambda: self._oferecer_atualizacao(versao_remota))
+        except Exception:
+            pass  # sem internet ou GitHub fora — ignora silenciosamente
+
+    def _oferecer_atualizacao(self, versao_remota):
+        cores = self.TEMAS[self.tema_atual]
+        ok = messagebox.askyesno(
+            "Atualização disponível",
+            f"Nova versão disponível: {versao_remota}\n"
+            f"Versão atual: {VERSION}\n\n"
+            f"Deseja atualizar agora?"
+        )
+        if not ok:
+            return
+
+        try:
+            # Baixa o novo script direto por cima do arquivo atual
+            caminho_atual = os.path.abspath(__file__)
+            urllib.request.urlretrieve(URL_SCRIPT, caminho_atual)
+
+            messagebox.showinfo(
+                "Atualizado!",
+                "Atualização concluída! O app vai reiniciar agora."
+            )
+            # Reinicia o próprio processo com o novo código
+            os.execv(sys.executable, [sys.executable, caminho_atual])
+
+        except Exception as e:
+            messagebox.showerror("Erro", f"Não foi possível atualizar:\n{e}")
 
     # ----------------------------------------------------------
     # ALMOÇO
