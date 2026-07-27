@@ -927,8 +927,10 @@ trocar('dia');
 
             messagebox.showinfo(
                 "Atualizado!",
-                "Atualização concluída! Feche e abra o app novamente."
+                "Atualização concluída! O app vai reiniciar agora."
             )
+            # Reinicia o próprio processo com o novo código
+            os.execv(sys.executable, [sys.executable, caminho_atual])
 
         except Exception as e:
             messagebox.showerror("Erro", f"Não foi possível atualizar:\n{e}")
