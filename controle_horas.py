@@ -16,7 +16,7 @@ import urllib.request
 from datetime import datetime
 
 # Versão atual do app — atualize esse número a cada novo commit
-VERSION = "1.0.0"
+VERSION = "1.0.3"
 
 # URLs do repositório público no GitHub
 URL_VERSION = "https://raw.githubusercontent.com/Pabloluan981/controle-horas/master/version.txt"
@@ -927,10 +927,8 @@ trocar('dia');
 
             messagebox.showinfo(
                 "Atualizado!",
-                "Atualização concluída! O app vai reiniciar agora."
+                "Atualização concluída! Feche e abra o app novamente."
             )
-            # Reinicia o próprio processo com o novo código
-            os.execv(sys.executable, [sys.executable, caminho_atual])
 
         except Exception as e:
             messagebox.showerror("Erro", f"Não foi possível atualizar:\n{e}")
