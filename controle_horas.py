@@ -900,7 +900,7 @@ trocar('dia');
         """
         try:
             with urllib.request.urlopen(URL_VERSION, timeout=5) as resp:
-                versao_remota = resp.read().decode().strip()
+                versao_remota = resp.read().decode("utf-8-sig").strip()
 
             if versao_remota != VERSION:
                 # Usa after() para chamar o popup na thread principal do tkinter
