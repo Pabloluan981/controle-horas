@@ -19,8 +19,8 @@ from datetime import datetime
 VERSION = "1.0.4"
 
 # URLs do repositório público no GitHub
-URL_VERSION = "https://raw.githubusercontent.com/Pabloluan981/controle-horas/master/version.txt"
-URL_SCRIPT  = "https://raw.githubusercontent.com/Pabloluan981/controle-horas/master/controle_horas.py"
+URL_VERSION  = "https://raw.githubusercontent.com/Pabloluan981/controle-horas/master/version.txt"
+URL_INSTALLER = "https://github.com/Pabloluan981/controle-horas/releases/latest/download/ControleHoras_Setup.exe"
 
 CAMINHO_DB = os.path.join(os.path.dirname(os.path.abspath(__file__)), "horas.db")
 
@@ -893,45 +893,83 @@ trocar('dia');
     # ----------------------------------------------------------
 
     def _verificar_atualizacao(self):
-        """
-        Roda em background (thread separada) pra não travar o app.
-        Busca o version.txt do GitHub e compara com a versão local.
-        Se for diferente, avisa o usuário na thread principal via 'after'.
-        """
         try:
             with urllib.request.urlopen(URL_VERSION, timeout=5) as resp:
                 versao_remota = resp.read().decode("utf-8-sig").strip()
-
             if versao_remota != VERSION:
-                # Usa after() para chamar o popup na thread principal do tkinter
-                # (tkinter não é thread-safe — nunca atualize widgets de outras threads)
                 self.root.after(0, lambda: self._oferecer_atualizacao(versao_remota))
         except Exception:
-            pass  # sem internet ou GitHub fora — ignora silenciosamente
+            pass
 
     def _oferecer_atualizacao(self, versao_remota):
-        cores = self.TEMAS[self.tema_atual]
         ok = messagebox.askyesno(
             "Atualização disponível",
             f"Nova versão disponível: {versao_remota}\n"
             f"Versão atual: {VERSION}\n\n"
-            f"Deseja atualizar agora?"
+            f"Deseja atualizar agora?\n"
+            f"(O download acontece em background — você será avisado quando estiver pronto)"
         )
         if not ok:
             return
 
-        try:
-            # Baixa o novo script direto por cima do arquivo atual
-            caminho_atual = os.path.abspath(__file__)
-            urllib.request.urlretrieve(URL_SCRIPT, caminho_atual)
+        # Mostra progresso e baixa em background
+        self._baixar_e_instalar(versao_remota)
 
+    def _baixar_e_instalar(self, versao_remota):
+        import tempfile
+
+        cores = self.TEMAS[self.tema_atual]
+
+        # Janela de progresso
+        jan = tk.Toplevel(self.root)
+        jan.title("Baixando atualização...")
+        jan.attributes("-topmost", True)
+        jan.resizable(False, False)
+        jan.config(bg=cores["bg"])
+        self.root.update_idletasks()
+        x = self.root.winfo_x() + (self.root.winfo_width() // 2) - 150
+        y = self.root.winfo_y() + (self.root.winfo_height() // 2) - 60
+        jan.geometry(f"300x100+{x}+{y}")
+
+        tk.Label(jan, text="⬇️  Baixando atualização...",
+                 font=("Segoe UI", 10, "bold"),
+                 bg=cores["bg"], fg=cores["texto"]).pack(pady=(16, 4))
+
+        label_prog = tk.Label(jan, text="0%",
+                              font=("Segoe UI", 9),
+                              bg=cores["bg"], fg=cores["texto_secundario"])
+        label_prog.pack()
+
+        caminho_instalador = os.path.join(tempfile.gettempdir(), "ControleHoras_Setup.exe")
+
+        def progresso(count, block_size, total_size):
+            if total_size > 0:
+                pct = min(int(count * block_size * 100 / total_size), 100)
+                self.root.after(0, lambda p=pct: label_prog.config(text=f"{p}%"))
+
+        def baixar():
+            try:
+                urllib.request.urlretrieve(URL_INSTALLER, caminho_instalador, progresso)
+                self.root.after(0, lambda: instalar())
+            except Exception as e:
+                self.root.after(0, lambda: [
+                    jan.destroy(),
+                    messagebox.showerror("Erro", f"Não foi possível baixar a atualização:\n{e}")
+                ])
+
+        def instalar():
+            jan.destroy()
             messagebox.showinfo(
-                "Atualizado!",
-                "Atualização concluída! Feche e abra o app novamente."
+                "Pronto!",
+                "Download concluído! O instalador vai abrir agora.\n"
+                "Clique em 'Avançar' para atualizar o app."
             )
+            # Roda o instalador silenciosamente
+            import subprocess
+            subprocess.Popen([caminho_instalador])
+            self.root.destroy()
 
-        except Exception as e:
-            messagebox.showerror("Erro", f"Não foi possível atualizar:\n{e}")
+        threading.Thread(target=baixar, daemon=True).start()
 
     # ----------------------------------------------------------
     # ALMOÇO
