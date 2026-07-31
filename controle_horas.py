@@ -16,7 +16,7 @@ import urllib.request
 from datetime import datetime
 
 # Versão atual do app — atualize esse número a cada novo commit
-VERSION = "1.0.3"
+VERSION = "1.0.4"
 
 # URLs do repositório público no GitHub
 URL_VERSION = "https://raw.githubusercontent.com/Pabloluan981/controle-horas/master/version.txt"
@@ -361,7 +361,7 @@ class AppControleHoras:
         self.botao_tema.pack(side="right")
 
         self.botao_config = tk.Button(
-            self.frame_topo, text="⚙️", font=("Segoe UI", 12),
+            self.frame_topo, text="🔧", font=("Segoe UI", 12),
             bd=0, relief="flat", cursor="hand2", command=self.abrir_configuracoes
         )
         self.botao_config.pack(side="right", padx=(0, 6))
