@@ -1,5 +1,5 @@
 ('E:\\Utilitários\\Projetos Pessoal\\Projetos '
- 'Python\\controle_horas\\build\\ControleHoras\\PYZ-00.pyz',
+ 'Python\\Controle_horas\\build\\ControleHoras\\PYZ-00.pyz',
  [('PIL',
    'C:\\Users\\Pablo '
    'Luan\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\PIL\\__init__.py',

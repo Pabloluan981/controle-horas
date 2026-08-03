@@ -1,6 +1,6 @@
 [Setup]
 AppName=Controle de Horas
-AppVersion=1.0.2
+AppVersion=1.0.5
 AppPublisher=Pabloluan981
 DefaultDirName={autopf}\ControleHoras
 DefaultGroupName=Controle de Horas
@@ -14,7 +14,7 @@ WizardStyle=modern
 Name: "brazilianportuguese"; MessagesFile: "compiler:Languages\BrazilianPortuguese.isl"
 
 [Tasks]
-Name: "desktopicon"; Description: "Criar atalho na área de trabalho"; GroupDescription: "Ícones adicionais:"
+Name: "desktopicon"; Description: "Criar atalho na ï¿½rea de trabalho"; GroupDescription: "ï¿½cones adicionais:"
 
 [Files]
 Source: "dist\ControleHoras.exe"; DestDir: "{app}"; Flags: ignoreversion
