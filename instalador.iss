@@ -6,6 +6,7 @@ DefaultDirName={autopf}\ControleHoras
 DefaultGroupName=Controle de Horas
 OutputDir=installer
 OutputBaseFilename=ControleHoras_Setup
+SetupIconFile=icone.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern

@@ -22,7 +22,29 @@ VERSION = "1.0.5"
 URL_VERSION  = "https://raw.githubusercontent.com/Pabloluan981/controle-horas/master/version.txt"
 URL_INSTALLER = "https://github.com/Pabloluan981/controle-horas/releases/latest/download/ControleHoras_Setup.exe"
 
-CAMINHO_DB = os.path.join(os.path.dirname(os.path.abspath(__file__)), "horas.db")
+def _pasta_persistente():
+    """
+    Pasta onde ficam os dados/recursos do app.
+
+    Quando rodando como .exe congelado (PyInstaller), __file__ aponta pra
+    dentro da pasta temporária de extração (_MEIxxxx), que é apagada a
+    cada fechamento — usar ela pro banco faria os dados sumirem a cada
+    reinício. Por isso usamos %LOCALAPPDATA% nesse caso, que é estável.
+    """
+    if getattr(sys, "frozen", False):
+        pasta = os.path.join(os.environ["LOCALAPPDATA"], "ControleHoras")
+        os.makedirs(pasta, exist_ok=True)
+        return pasta
+    return os.path.dirname(os.path.abspath(__file__))
+
+
+def resource_path(nome_arquivo):
+    """Caminho de um recurso empacotado (ex.: ícone), funciona rodando como script ou como .exe."""
+    base = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base, nome_arquivo)
+
+
+CAMINHO_DB = os.path.join(_pasta_persistente(), "horas.db")
 
 
 # ============================================================
@@ -1337,5 +1359,9 @@ trocar('dia');
 if __name__ == "__main__":
     criar_tabela()
     root = tk.Tk()
+    try:
+        root.iconbitmap(resource_path("icone.ico"))
+    except tk.TclError:
+        pass
     app  = AppControleHoras(root)
     root.mainloop()
