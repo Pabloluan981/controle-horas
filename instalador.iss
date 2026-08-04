@@ -1,6 +1,6 @@
 [Setup]
 AppName=Controle de Horas
-AppVersion=1.0.5
+AppVersion=1.0.6
 AppPublisher=Pabloluan981
 DefaultDirName={autopf}\ControleHoras
 DefaultGroupName=Controle de Horas

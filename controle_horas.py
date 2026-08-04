@@ -16,7 +16,7 @@ import urllib.request
 from datetime import datetime
 
 # Versão atual do app — atualize esse número a cada novo commit
-VERSION = "1.0.5"
+VERSION = "1.0.6"
 
 # URLs do repositório público no GitHub
 URL_VERSION  = "https://raw.githubusercontent.com/Pabloluan981/controle-horas/master/version.txt"
